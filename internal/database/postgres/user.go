@@ -29,6 +29,20 @@ func (gu *userRepository) CreateUser(ctx context.Context, user *database.User) e
 	return nil
 }
 
+func (gu *userRepository) FindUserByID(ctx context.Context, id string) (*database.User, error) {
+	var user database.User
+
+	tx := gu.db.WithContext(ctx).Where("id = ?", id).First(&user)
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return nil, database.ErrRecordNotFound
+		}
+		return nil, tx.Error
+	}
+
+	return &user, nil
+}
+
 func (gu *userRepository) FindUserByEmail(ctx context.Context, email string) (*database.User, error) {
 	var user database.User
 

@@ -3,7 +3,6 @@ package handlers
 import (
 	"github/oxiginedev/gostarter/api/types"
 	"github/oxiginedev/gostarter/internal/database/postgres"
-	"github/oxiginedev/gostarter/internal/pkg/jwt"
 	"github/oxiginedev/gostarter/services"
 	"github/oxiginedev/gostarter/util"
 	"net/http"
@@ -20,15 +19,16 @@ func (h *Handler) LoginUser(c echo.Context) error {
 
 	err := authUser.Validate()
 	if err != nil {
-		res := util.BuildErrorResponse("The given data was invalid", err)
-		return c.JSON(http.StatusUnprocessableEntity, res)
+		errs := util.BuildErrorResponse("The given data was invalid", err)
+		return c.JSON(http.StatusUnprocessableEntity, errs)
 	}
 
 	ls := services.LoginUserService{
 		UserRepo: postgres.NewUserRepository(h.DB.GetDB()),
-		JWT:      jwt.NewJWT(&h.Config.JWT),
+		JWT:      h.JWT,
 		Data:     &authUser,
 	}
+
 	user, token, err := ls.Run(c.Request().Context())
 	if err != nil {
 		return err

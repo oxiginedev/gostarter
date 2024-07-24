@@ -13,7 +13,7 @@ type User struct {
 	Name            string       `json:"name"`
 	Email           string       `json:"email"`
 	EmailVerifiedAt sql.NullTime `json:"email_verified_at"`
-	Password        string       `json:"password"`
+	Password        string       `json:"-"`
 	CreatedAt       time.Time    `json:"created_at"`
 	UpdatedAt       time.Time    `json:"updated_at"`
 }

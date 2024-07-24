@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"github/oxiginedev/gostarter/api/middleware"
 	"github/oxiginedev/gostarter/api/types"
+	"github/oxiginedev/gostarter/internal/database/postgres"
 	"github/oxiginedev/gostarter/services"
 	"github/oxiginedev/gostarter/util"
 	"net/http"
@@ -19,16 +21,19 @@ func (h *Handler) RegisterUser(c echo.Context) error {
 
 	err = newUser.Validate()
 	if err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, err)
+		errs := util.BuildErrorResponse("The given data was invalid", err)
+		return c.JSON(http.StatusUnprocessableEntity, errs)
 	}
 
 	rs := services.RegisterUserService{
-		Data: &newUser,
+		UserRepo: postgres.NewUserRepository(h.DB.GetDB()),
+		JWT:      h.JWT,
+		Data:     &newUser,
 	}
 
 	user, token, err := rs.Run(c.Request().Context())
 	if err != nil {
-
+		return err
 	}
 
 	data := &types.LoginResponse{
@@ -37,4 +42,11 @@ func (h *Handler) RegisterUser(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, util.BuildSuccessResponse("Registration successful", data))
+}
+
+func (h *Handler) GetUser(c echo.Context) error {
+	authUser := middleware.GetAuthUserFromContext(c)
+
+	data := &types.UserResponse{User: authUser}
+	return c.JSON(http.StatusOK, util.BuildSuccessResponse("User retrieved successfully", data))
 }

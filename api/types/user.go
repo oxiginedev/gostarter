@@ -6,6 +6,12 @@ import (
 	"github/oxiginedev/gostarter/pkg/validator"
 )
 
+type ContextKey string
+
+func (c ContextKey) String() string {
+	return string(c)
+}
+
 type RegisterUser struct {
 	Name                 string `json:"name" valid:"required"`
 	Email                string `json:"email" valid:"required,email"`
@@ -29,4 +35,8 @@ func (lu LoginUser) Validate() error {
 type LoginResponse struct {
 	User  *database.User `json:"user"`
 	Token *jwt.Token     `json:"token"`
+}
+
+type UserResponse struct {
+	User *database.User `json:"user"`
 }

@@ -64,9 +64,11 @@ func persistentPreRunE(app *App) func(cmd *cobra.Command, args []string) error {
 
 		log.Println("connected to database")
 
-		err = migrations.AutoMigrate(database)
-		if err != nil {
-			return err
+		if config.Database.AutoMigrate {
+			err = migrations.AutoMigrate(database)
+			if err != nil {
+				return err
+			}
 		}
 
 		app.config = config

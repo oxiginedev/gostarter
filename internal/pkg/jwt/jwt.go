@@ -1,12 +1,19 @@
 package jwt
 
 import (
+	"errors"
+	"fmt"
 	"github/oxiginedev/gostarter/config"
 	"github/oxiginedev/gostarter/internal/database"
 	"github/oxiginedev/gostarter/util"
 	"time"
 
 	"github.com/golang-jwt/jwt"
+)
+
+var (
+	ErrInvalidToken = errors.New("invalid token")
+	ErrTokenExpired = errors.New("expired token")
 )
 
 var DefaultJWTConfiguration = &JWT{
@@ -26,6 +33,11 @@ type JWT struct {
 type Token struct {
 	Access  string `json:"access_token"`
 	Refresh string `json:"refresh_token"`
+}
+
+type ValidatedToken struct {
+	UserID string
+	Expiry int64
 }
 
 func NewJWT(cfg *config.JWTConfiguration) *JWT {
@@ -51,24 +63,24 @@ func NewJWT(cfg *config.JWTConfiguration) *JWT {
 }
 
 func (j *JWT) GenerateAccessToken(user *database.User) (*Token, error) {
-	aclaims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": user.ID,
 		"exp": time.Now().Add(time.Second * time.Duration(j.Expiry)).Unix(),
 	})
 
 	token := &Token{}
 
-	accessToken, err := aclaims.SignedString([]byte(j.Secret))
+	accessToken, err := claims.SignedString([]byte(j.Secret))
 	if err != nil {
 		return token, err
 	}
 
-	rclaims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+	claims = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": user.ID,
 		"exp": time.Now().Add(time.Second * time.Duration(j.RefreshExpiry)).Unix(),
 	})
 
-	refreshToken, err := rclaims.SignedString([]byte(j.RefreshSecret))
+	refreshToken, err := claims.SignedString([]byte(j.RefreshSecret))
 	if err != nil {
 		return token, err
 	}
@@ -77,4 +89,50 @@ func (j *JWT) GenerateAccessToken(user *database.User) (*Token, error) {
 	token.Refresh = refreshToken
 
 	return token, nil
+}
+
+func (j *JWT) ValidateAccessToken(accessToken string) (*ValidatedToken, error) {
+	return j.validateToken(accessToken, j.Secret)
+}
+
+func (j *JWT) ValidateRefreshToken(accessToken string) (*ValidatedToken, error) {
+	return j.validateToken(accessToken, j.RefreshSecret)
+}
+
+func (j *JWT) validateToken(accessToken, secret string) (*ValidatedToken, error) {
+	var userId string
+	var expiry float64
+
+	token, err := jwt.Parse(accessToken, func(t *jwt.Token) (interface{}, error) {
+		_, ok := t.Method.(*jwt.SigningMethodHMAC)
+		if !ok {
+			return nil, fmt.Errorf("unexpected signing method - %v", t.Header["alg"])
+		}
+
+		return []byte(secret), nil
+	})
+
+	if err != nil {
+		v, ok := err.(*jwt.ValidationError)
+		if ok && v.Errors == jwt.ValidationErrorExpired {
+			if payload, ok := token.Claims.(jwt.MapClaims); ok {
+				expiry = payload["exp"].(float64)
+			}
+
+			return &ValidatedToken{Expiry: int64(expiry)}, ErrTokenExpired
+		}
+
+		return nil, err
+	}
+
+	payload, ok := token.Claims.(jwt.MapClaims)
+	if ok && token.Valid {
+		userId = payload["sub"].(string)
+		expiry = payload["exp"].(float64)
+
+		v := &ValidatedToken{UserID: userId, Expiry: int64(expiry)}
+		return v, nil
+	}
+
+	return nil, err
 }

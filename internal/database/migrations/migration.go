@@ -26,7 +26,7 @@ func AutoMigrate(db database.Database) error {
 // Register migrations here
 func migrateTables() []interface{} {
 	return []interface{}{
-		database.User{},
+		&database.User{},
 	}
 }
 
@@ -44,11 +44,11 @@ type AlterColumn struct {
 }
 
 func (a *AlterColumn) apply(db *gorm.DB) error {
-	if err := db.Exec(fmt.Sprintf("ALTER TABLE %s ALTER COLUMN %s TYPE %s USING %s::%s", a.TableName, a.Column, a.Type, a.Column, a.Type)).Error; err != nil {
+	query := fmt.Sprintf("ALTER TABLE %s ALTER COLUMN %s TYPE %s USING %s::%s", a.TableName, a.Column, a.Type, a.Column, a.Type)
+	if err := db.Exec(query).Error; err != nil {
 		return err
 	}
 
-	// Update the GORM model to reflect the changes
 	if err := db.Migrator().AlterColumn(a.Model, a.Column); err != nil {
 		return err
 	}

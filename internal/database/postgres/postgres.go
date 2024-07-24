@@ -13,7 +13,16 @@ type PostgresRepository struct {
 }
 
 func NewPostgresRepository(cfg *config.DatabaseConfiguration) (*PostgresRepository, error) {
-	db, err := gorm.Open(postgres.Open(cfg.BuildDSN()), &gorm.Config{})
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=%s Timezone=%s",
+		cfg.Host,
+		cfg.Username,
+		cfg.Password,
+		cfg.Database,
+		cfg.Port,
+		cfg.SSLMode,
+		cfg.Timezone,
+	)
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database - %v", err)
 	}

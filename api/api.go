@@ -5,6 +5,7 @@ import (
 	"github/oxiginedev/gostarter/api/middleware"
 	"github/oxiginedev/gostarter/config"
 	"github/oxiginedev/gostarter/internal/database"
+	"github/oxiginedev/gostarter/internal/pkg/jwt"
 	"github/oxiginedev/gostarter/services"
 	"github/oxiginedev/gostarter/util"
 	"log"
@@ -43,7 +44,12 @@ func (a *API) buildRouter() *echo.Echo {
 
 func (a *API) BuildAPIRoutes() *echo.Echo {
 	router := a.buildRouter()
-	handler := &handlers.Handler{DB: a.DB, Config: a.Config}
+
+	handler := &handlers.Handler{
+		DB:     a.DB,
+		Config: a.Config,
+		JWT:    jwt.NewJWT(&a.Config.JWT),
+	}
 
 	v1Router := router.Group("/api/v1")
 
@@ -52,8 +58,13 @@ func (a *API) BuildAPIRoutes() *echo.Echo {
 	v1Router.POST("/auth/register", handler.RegisterUser)
 	v1Router.POST("/auth/login", handler.LoginUser)
 
+	authV1Router := v1Router.Group("", middleware.Authenticate(handler.JWT, a.DB))
+
+	authV1Router.GET("/user/me", handler.GetUser)
+
 	router.RouteNotFound("/*", func(c echo.Context) error {
-		return c.JSON(http.StatusNotFound, util.BuildErrorResponse("The requested URL is invalid", nil))
+		err := util.BuildErrorResponse("The requested URL is invalid", nil)
+		return c.JSON(http.StatusNotFound, err)
 	})
 
 	return router
