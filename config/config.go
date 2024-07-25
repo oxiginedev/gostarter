@@ -11,17 +11,18 @@ import (
 )
 
 type DatabaseConfiguration struct {
-	Driver      string `envconfig:"DB_DRIVER"`
-	Host        string `envconfig:"DB_HOST"`
-	Username    string `envconfig:"DB_USERNAME"`
-	Password    string `envconfig:"DB_PASSWORD"`
-	Database    string `envconfig:"DB_DATABASE"`
-	Port        uint   `envconfig:"DB_PORT"`
-	MaxPool     int    `envconfig:"DB_MAX_POOL"`
-	MaxIdlePool int    `envconfig:"DB_MAX_IDLE_POOL"`
-	MaxLifetime int    `envconfig:"DB_MAX_LIFETIME"`
-	MaxIdleTime int    `envconfig:"DB_MAX_IDLE_TIME"`
-	Options     string `envconfig:"DB_OPTIONS"`
+	Driver         string `envconfig:"DB_DRIVER"`
+	Host           string `envconfig:"DB_HOST"`
+	Username       string `envconfig:"DB_USERNAME"`
+	Password       string `envconfig:"DB_PASSWORD"`
+	Database       string `envconfig:"DB_DATABASE"`
+	Port           uint   `envconfig:"DB_PORT"`
+	MaxPool        int    `envconfig:"DB_MAX_POOL"`
+	MaxIdlePool    int    `envconfig:"DB_MAX_IDLE_POOL"`
+	MaxLifetime    int    `envconfig:"DB_MAX_LIFETIME"`
+	MaxIdleTime    int    `envconfig:"DB_MAX_IDLE_TIME"`
+	Options        string `envconfig:"DB_OPTIONS"`
+	MigrationsPath string `envconfig:"DB_MIGRATIONS_PATH"`
 }
 
 func (dc DatabaseConfiguration) BuildDSN() string {

@@ -72,6 +72,6 @@ func persistentPreRunE(app *App) func(cmd *cobra.Command, args []string) error {
 
 func persistentPostRunE(app *App) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
-		return nil
+		return app.database.Close()
 	}
 }
