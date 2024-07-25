@@ -17,9 +17,11 @@ type DatabaseConfiguration struct {
 	Password    string `envconfig:"DB_PASSWORD"`
 	Database    string `envconfig:"DB_DATABASE"`
 	Port        uint   `envconfig:"DB_PORT"`
-	SSLMode     string `envconfig:"DB_SSL_MODE"`
-	Timezone    string `envconfig:"DB_TIMEZONE"`
-	AutoMigrate bool   `envconfig:"DB_AUTO_MIGRATE"`
+	MaxPool     int    `envconfig:"DB_MAX_POOL"`
+	MaxIdlePool int    `envconfig:"DB_MAX_IDLE_POOL"`
+	MaxLifetime int    `envconfig:"DB_MAX_LIFETIME"`
+	MaxIdleTime int    `envconfig:"DB_MAX_IDLE_TIME"`
+	Options     string `envconfig:"DB_OPTIONS"`
 }
 
 func (dc DatabaseConfiguration) BuildDSN() string {

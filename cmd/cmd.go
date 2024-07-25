@@ -3,8 +3,6 @@ package cmd
 import (
 	"github/oxiginedev/gostarter/config"
 	"github/oxiginedev/gostarter/internal/database"
-	"github/oxiginedev/gostarter/internal/database/migrations"
-	"github/oxiginedev/gostarter/internal/database/postgres"
 	"log"
 	"time"
 
@@ -14,7 +12,7 @@ import (
 type App struct {
 	cmd      *cobra.Command
 	config   *config.Configuration
-	database database.Database
+	database *database.Connection
 }
 
 func Run() error {
@@ -36,6 +34,7 @@ func Run() error {
 	app.cmd.PersistentPostRunE = persistentPostRunE(app)
 
 	app.cmd.AddCommand(serverCommand(app))
+	app.cmd.AddCommand(migrateCommand(app))
 
 	err := app.cmd.Execute()
 	if err != nil {
@@ -57,19 +56,12 @@ func persistentPreRunE(app *App) func(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		database, err := postgres.NewPostgresRepository(&config.Database)
+		database, err := database.Dial(&config.Database)
 		if err != nil {
 			return err
 		}
 
 		log.Println("connected to database")
-
-		if config.Database.AutoMigrate {
-			err = migrations.AutoMigrate(database)
-			if err != nil {
-				return err
-			}
-		}
 
 		app.config = config
 		app.database = database

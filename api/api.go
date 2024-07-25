@@ -15,15 +15,19 @@ import (
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
 )
 
-type API struct {
-	DB     database.Database
+type APIOptions struct {
 	Config *config.Configuration
+	DB     *database.Connection
 }
 
-func NewAPI(db database.Database, cfg *config.Configuration) *API {
+type API struct {
+	Router http.Handler
+	opts   *APIOptions
+}
+
+func NewAPI(opts *APIOptions) *API {
 	ah := &API{
-		DB:     db,
-		Config: cfg,
+		opts: opts,
 	}
 
 	return ah
@@ -46,9 +50,9 @@ func (a *API) BuildAPIRoutes() *echo.Echo {
 	router := a.buildRouter()
 
 	handler := &handlers.Handler{
-		DB:     a.DB,
-		Config: a.Config,
-		JWT:    jwt.NewJWT(&a.Config.JWT),
+		DB:     a.opts.DB,
+		Config: a.opts.Config,
+		JWT:    jwt.NewJWT(&a.opts.Config.JWT),
 	}
 
 	v1Router := router.Group("/api/v1")
@@ -58,7 +62,7 @@ func (a *API) BuildAPIRoutes() *echo.Echo {
 	v1Router.POST("/auth/register", handler.RegisterUser)
 	v1Router.POST("/auth/login", handler.LoginUser)
 
-	authV1Router := v1Router.Group("", middleware.Authenticate(handler.JWT, a.DB))
+	authV1Router := v1Router.Group("", middleware.Authenticate(handler.JWT, a.opts.DB))
 
 	authV1Router.GET("/user/me", handler.GetUser)
 

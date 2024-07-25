@@ -3,7 +3,7 @@ package middleware
 import (
 	"errors"
 	"github/oxiginedev/gostarter/internal/database"
-	"github/oxiginedev/gostarter/internal/database/postgres"
+	"github/oxiginedev/gostarter/internal/models"
 	"github/oxiginedev/gostarter/internal/pkg/jwt"
 	"github/oxiginedev/gostarter/util"
 	"net/http"
@@ -15,7 +15,7 @@ import (
 const AuthUserCtx = "authUser"
 
 // Authenticates restricts access to protected routes
-func Authenticate(jwt *jwt.JWT, db database.Database) echo.MiddlewareFunc {
+func Authenticate(jwt *jwt.JWT, db *database.Connection) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			authHeader := c.Request().Header.Get("Authorization")
@@ -36,8 +36,7 @@ func Authenticate(jwt *jwt.JWT, db database.Database) echo.MiddlewareFunc {
 				return c.JSON(http.StatusUnauthorized, util.BuildErrorResponse("unauthenticated", nil))
 			}
 
-			userRepo := postgres.NewUserRepository(db.GetDB())
-			user, err := userRepo.FindUserByID(c.Request().Context(), token.UserID)
+			user, err := models.FindUserByID(db, token.UserID)
 			if err != nil {
 				if errors.Is(err, database.ErrRecordNotFound) {
 					return c.JSON(http.StatusUnauthorized, util.BuildErrorResponse("unauthenticated", nil))
@@ -53,6 +52,6 @@ func Authenticate(jwt *jwt.JWT, db database.Database) echo.MiddlewareFunc {
 	}
 }
 
-func GetAuthUserFromContext(c echo.Context) *database.User {
-	return c.Get(AuthUserCtx).(*database.User)
+func GetAuthUserFromContext(c echo.Context) *models.User {
+	return c.Get(AuthUserCtx).(*models.User)
 }

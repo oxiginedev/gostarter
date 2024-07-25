@@ -7,7 +7,7 @@ import (
 )
 
 type Handler struct {
-	DB     database.Database
 	Config *config.Configuration
+	DB     *database.Connection
 	JWT    *jwt.JWT
 }

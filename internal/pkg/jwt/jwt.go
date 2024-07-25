@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github/oxiginedev/gostarter/config"
-	"github/oxiginedev/gostarter/internal/database"
+	"github/oxiginedev/gostarter/internal/models"
 	"github/oxiginedev/gostarter/util"
 	"time"
 
@@ -31,8 +31,9 @@ type JWT struct {
 }
 
 type Token struct {
-	Access  string `json:"access_token"`
-	Refresh string `json:"refresh_token"`
+	Access    string    `json:"access_token"`
+	ExpiresAt time.Time `json:"expires_at"`
+	Refresh   string    `json:"refresh_token"`
 }
 
 type ValidatedToken struct {
@@ -62,10 +63,12 @@ func NewJWT(cfg *config.JWTConfiguration) *JWT {
 	return jt
 }
 
-func (j *JWT) GenerateAccessToken(user *database.User) (*Token, error) {
+func (j *JWT) GenerateAccessToken(user *models.User) (*Token, error) {
+	expiresAt := time.Now().Add(time.Duration(j.Expiry))
+
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": user.ID,
-		"exp": time.Now().Add(time.Second * time.Duration(j.Expiry)).Unix(),
+		"exp": expiresAt.Unix(),
 	})
 
 	token := &Token{}
@@ -87,6 +90,7 @@ func (j *JWT) GenerateAccessToken(user *database.User) (*Token, error) {
 
 	token.Access = accessToken
 	token.Refresh = refreshToken
+	token.ExpiresAt = expiresAt
 
 	return token, nil
 }

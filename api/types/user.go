@@ -1,7 +1,7 @@
 package types
 
 import (
-	"github/oxiginedev/gostarter/internal/database"
+	"github/oxiginedev/gostarter/internal/models"
 	"github/oxiginedev/gostarter/internal/pkg/jwt"
 	"github/oxiginedev/gostarter/pkg/validator"
 )
@@ -13,7 +13,8 @@ func (c ContextKey) String() string {
 }
 
 type RegisterUser struct {
-	Name                 string `json:"name" valid:"required"`
+	FirstName            string `json:"first_name" valid:"required"`
+	LastName             string `json:"last_name" valid:"required"`
 	Email                string `json:"email" valid:"required,email"`
 	Password             string `json:"password" valid:"required"`
 	PasswordConfirmation string `json:"password_confirmation" valid:"required"`
@@ -33,10 +34,10 @@ func (lu LoginUser) Validate() error {
 }
 
 type LoginResponse struct {
-	User  *database.User `json:"user"`
-	Token *jwt.Token     `json:"token"`
+	User  *models.User `json:"user"`
+	Token *jwt.Token   `json:"token"`
 }
 
 type UserResponse struct {
-	User *database.User `json:"user"`
+	User *models.User `json:"user"`
 }

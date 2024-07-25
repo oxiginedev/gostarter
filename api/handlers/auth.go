@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"github/oxiginedev/gostarter/api/types"
-	"github/oxiginedev/gostarter/internal/database/postgres"
 	"github/oxiginedev/gostarter/services"
 	"github/oxiginedev/gostarter/util"
 	"net/http"
@@ -24,9 +23,9 @@ func (h *Handler) LoginUser(c echo.Context) error {
 	}
 
 	ls := services.LoginUserService{
-		UserRepo: postgres.NewUserRepository(h.DB.GetDB()),
-		JWT:      h.JWT,
-		Data:     &authUser,
+		DB:   h.DB,
+		JWT:  h.JWT,
+		Data: &authUser,
 	}
 
 	user, token, err := ls.Run(c.Request().Context())

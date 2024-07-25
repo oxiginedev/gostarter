@@ -21,7 +21,10 @@ func serverCommand(app *App) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			var h http.Handler
 
-			a := api.NewAPI(app.database, app.config)
+			a := api.NewAPI(&api.APIOptions{
+				DB:     app.database,
+				Config: app.config,
+			})
 			h = a.BuildAPIRoutes()
 
 			srv := &http.Server{
