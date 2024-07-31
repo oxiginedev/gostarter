@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"github/oxiginedev/gostarter/config"
-	"github/oxiginedev/gostarter/internal/database"
-	"github/oxiginedev/gostarter/internal/pkg/jwt"
+	"github.com/oxiginedev/gostarter/config"
+	"github.com/oxiginedev/gostarter/internal/database"
+	"github.com/oxiginedev/gostarter/internal/pkg/jwt"
 )
 
 type Handler struct {

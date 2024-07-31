@@ -2,9 +2,10 @@ package config
 
 import (
 	"fmt"
-	"github/oxiginedev/gostarter/util"
 	"net/url"
 	"os"
+
+	"github.com/oxiginedev/gostarter/util"
 
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
@@ -55,10 +56,21 @@ type HTTPConfiguration struct {
 	Port uint32 `envconfig:"HTTP_PORT"`
 }
 
+type MailConfiguration struct {
+	Host        string `envconfig:"MAIL_HOST"`
+	Port        uint   `envconfig:"MAIL_PORT"`
+	Username    string `envconfig:"MAIL_USERNAME"`
+	Password    string `envconfig:"MAIL_PASSWORD"`
+	SSL         bool   `envconfig:"MAIL_SSL"`
+	FromAddress string `envconfig:"MAIL_FROM_ADDRESS"`
+	FromName    string `envconfig:"MAIL_FROM_NAME"`
+}
+
 type Configuration struct {
 	HTTP     HTTPConfiguration
 	Database DatabaseConfiguration
 	JWT      JWTConfiguration
+	Mail     MailConfiguration
 }
 
 func Load(p string) (*Configuration, error) {

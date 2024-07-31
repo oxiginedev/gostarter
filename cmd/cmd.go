@@ -1,10 +1,11 @@
 package cmd
 
 import (
-	"github/oxiginedev/gostarter/config"
-	"github/oxiginedev/gostarter/internal/database"
 	"log"
 	"time"
+
+	"github.com/oxiginedev/gostarter/config"
+	"github.com/oxiginedev/gostarter/internal/database"
 
 	"github.com/spf13/cobra"
 )

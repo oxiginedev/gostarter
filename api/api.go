@@ -1,15 +1,16 @@
 package api
 
 import (
-	"github/oxiginedev/gostarter/api/handlers"
-	"github/oxiginedev/gostarter/api/middleware"
-	"github/oxiginedev/gostarter/config"
-	"github/oxiginedev/gostarter/internal/database"
-	"github/oxiginedev/gostarter/internal/pkg/jwt"
-	"github/oxiginedev/gostarter/services"
-	"github/oxiginedev/gostarter/util"
 	"log"
 	"net/http"
+
+	"github.com/oxiginedev/gostarter/api/handlers"
+	"github.com/oxiginedev/gostarter/api/middleware"
+	"github.com/oxiginedev/gostarter/config"
+	"github.com/oxiginedev/gostarter/internal/database"
+	"github.com/oxiginedev/gostarter/internal/pkg/jwt"
+	"github.com/oxiginedev/gostarter/services"
+	"github.com/oxiginedev/gostarter/util"
 
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
@@ -49,7 +50,7 @@ func (a *API) buildRouter() *echo.Echo {
 func (a *API) BuildAPIRoutes() *echo.Echo {
 	router := a.buildRouter()
 
-	handler := &handlers.Handler{
+	h := &handlers.Handler{
 		DB:     a.opts.DB,
 		Config: a.opts.Config,
 		JWT:    jwt.NewJWT(&a.opts.Config.JWT),
@@ -57,14 +58,16 @@ func (a *API) BuildAPIRoutes() *echo.Echo {
 
 	v1Router := router.Group("/api/v1")
 
-	v1Router.GET("/health", handler.HandleHealth)
+	v1Router.GET("/health", h.HandleHealth)
 
-	v1Router.POST("/auth/register", handler.RegisterUser)
-	v1Router.POST("/auth/login", handler.LoginUser)
+	v1Router.POST("/auth/register", h.RegisterUser)
+	v1Router.POST("/auth/login", h.LoginUser)
 
-	authV1Router := v1Router.Group("", middleware.Authenticate(handler.JWT, a.opts.DB))
+	authV1Router := v1Router.Group("", middleware.Authenticate(h.JWT, a.opts.DB))
 
-	authV1Router.GET("/user/me", handler.GetUser)
+	authV1Router.GET("/auth/verification/:token", h.VerifyUserEmail)
+	authV1Router.POST("/auth/verification/resend", h.ResendVerificationEmail)
+	authV1Router.GET("/user/me", h.GetUser)
 
 	router.RouteNotFound("/*", func(c echo.Context) error {
 		err := util.BuildErrorResponse("The requested URL is invalid", nil)

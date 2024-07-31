@@ -2,9 +2,11 @@ package database
 
 import (
 	"context"
-	"github/oxiginedev/gostarter/config"
+	"fmt"
 	"net/url"
 	"time"
+
+	"github.com/oxiginedev/gostarter/config"
 
 	"github.com/gobuffalo/pop/v6"
 	"github.com/pkg/errors"
@@ -32,11 +34,11 @@ func Dial(cfg *config.DatabaseConfiguration) (*Connection, error) {
 		ConnMaxIdleTime: time.Duration(cfg.MaxIdleTime),
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "opening database connection")
+		return nil, fmt.Errorf("opening database connection - %w", err)
 	}
 
 	if err := conn.Open(); err != nil {
-		return nil, errors.Wrap(err, "checking database connection")
+		return nil, fmt.Errorf("checking database connection - %w", err)
 	}
 
 	return &Connection{conn}, nil

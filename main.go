@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github/oxiginedev/gostarter/cmd"
 	"os"
+
+	"github.com/oxiginedev/gostarter/cmd"
 )
 
 func main() {
-	err := cmd.Run()
-	if err != nil {
+	if err := cmd.Run(); err != nil {
 		os.Exit(1)
 	}
 

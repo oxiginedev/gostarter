@@ -2,12 +2,13 @@ package middleware
 
 import (
 	"errors"
-	"github/oxiginedev/gostarter/internal/database"
-	"github/oxiginedev/gostarter/internal/models"
-	"github/oxiginedev/gostarter/internal/pkg/jwt"
-	"github/oxiginedev/gostarter/util"
 	"net/http"
 	"strings"
+
+	"github.com/oxiginedev/gostarter/internal/database"
+	"github.com/oxiginedev/gostarter/internal/models"
+	"github.com/oxiginedev/gostarter/internal/pkg/jwt"
+	"github.com/oxiginedev/gostarter/util"
 
 	"github.com/labstack/echo/v4"
 )
@@ -22,7 +23,8 @@ func Authenticate(jwt *jwt.JWT, db *database.Connection) echo.MiddlewareFunc {
 			authParts := strings.Split(authHeader, " ")
 
 			if len(authParts) != 2 {
-				return c.JSON(http.StatusUnauthorized, util.BuildErrorResponse("invalid header structure", nil))
+				rd := util.BuildErrorResponse("invalid header structure", nil)
+				return c.JSON(http.StatusUnauthorized, rd)
 			}
 
 			authToken := authParts[1]

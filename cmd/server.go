@@ -3,13 +3,14 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"github/oxiginedev/gostarter/api"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/oxiginedev/gostarter/api"
 
 	"github.com/spf13/cobra"
 )

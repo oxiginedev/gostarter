@@ -3,10 +3,11 @@ package jwt
 import (
 	"errors"
 	"fmt"
-	"github/oxiginedev/gostarter/config"
-	"github/oxiginedev/gostarter/internal/models"
-	"github/oxiginedev/gostarter/util"
 	"time"
+
+	"github.com/oxiginedev/gostarter/config"
+	"github.com/oxiginedev/gostarter/internal/models"
+	"github.com/oxiginedev/gostarter/util"
 
 	"github.com/golang-jwt/jwt"
 )

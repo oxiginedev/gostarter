@@ -10,7 +10,7 @@ func (se *ServiceError) Error() string {
 	return se.ErrMsg
 }
 
-func newServiceError(code int, msg string, err error) *ServiceError {
+func NewServiceError(code int, msg string, err error) *ServiceError {
 	return &ServiceError{
 		ErrCode:  code,
 		ErrMsg:   msg,
